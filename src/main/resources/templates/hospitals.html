@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DR-AI | Nearby Hospitals</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/custom.css">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <style>
+        :root {
+            --primary: #ff4757;
+            --primary-gradient: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
+            --secondary: #2f3542;
+            --glass: rgba(255, 255, 255, 0.95);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background: #dfe4ea;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .overlay-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 350px;
+            max-height: 90vh;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            overflow-y: auto;
+            animation: slideInLeft 0.5s ease;
+        }
+
+        .header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #747d8c;
+            font-size: 0.9rem;
+        }
+
+        .locate-btn {
+            width: 100%;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .locate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(255, 71, 87, 0.3);
+        }
+
+        .hospital-list {
+            list-style: none;
+        }
+
+        .hospital-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #f1f2f6;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .hospital-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-color: var(--primary);
+        }
+
+        .hospital-name {
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .hospital-type {
+            font-size: 0.85rem;
+            color: #747d8c;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .directions-link {
+            display: inline-block;
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .directions-link:hover {
+            text-decoration: underline;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        .back-home {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            color: var(--secondary);
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .back-home:hover {
+            transform: translateY(-2px);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .overlay-panel {
+                width: 90%;
+                left: 5%;
+                top: auto;
+                bottom: 20px;
+                max-height: 40vh;
+            }
+
+            .back-home {
+                top: 10px;
+                right: 10px;
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-background">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <a href="/" class="back-home"><i class="fas fa-home"></i> Home</a>
+
+    <div class="overlay-panel">
+        <div class="header">
+            <h1><i class="fas fa-hospital-alt" style="color: var(--primary); margin-right: 10px;"></i>Nearby Hospitals
+            </h1>
+            <p class="subtitle">Find emergency care near you.</p>
+        </div>
+
+        <button class="locate-btn" onclick="getLocation()">
+            <span class="btn-text">Find Near Me</span>
+            <div class="loading-spinner"></div>
+        </button>
+
+        <div id="status-msg" style="text-align: center; color: #747d8c; margin-bottom: 15px;"></div>
+
+        <ul class="hospital-list" id="hospital-list">
+            <!-- Items will be injected here -->
+        </ul>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        // Initialize Map
+        const map = L.map('map').setView([20.5937, 78.9629], 5); // Default: India
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        let userMarker = null;
+        let hospitalMarkers = [];
+
+        // Custom Icons
+        const userIcon = L.divIcon({
+            html: '<div style="background: #2ed573; width: 15px; height: 15px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>',
+            className: 'user-marker-icon'
+        });
+
+        const hospitalIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/2830/2830305.png', // Hospital Icon
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -32]
+        });
+
+        function getLocation() {
+            const btn = document.querySelector('.locate-btn');
+            const btnText = document.querySelector('.btn-text');
+            const spinner = document.querySelector('.loading-spinner');
+            const status = document.getElementById('status-msg');
+
+            if (!navigator.geolocation) {
+                status.textContent = "Geolocation is not supported by your browser.";
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            spinner.style.display = 'block';
+            status.textContent = "Locating you...";
+
+            navigator.geolocation.getCurrentPosition(success, error);
+
+            function success(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                // Update Map
+                map.setView([lat, lng], 14);
+
+                if (userMarker) map.removeLayer(userMarker);
+                userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map)
+                    .bindPopup("You are here").openPopup();
+
+                status.textContent = "Searching for hospitals...";
+                fetchHospitals(lat, lng);
+            }
+
+            function error() {
+                status.textContent = "Unable to retrieve your location.";
+                btn.disabled = false;
+                btnText.style.display = 'block';
+                spinner.style.display = 'none';
+            }
+        }
+
+        async function fetchHospitals(lat, lng) {
+            // Overpass API Query (Hospitals within 5km)
+            const query = `
+            [out:json];
+            (
+              node["amenity"="hospital"](around:5000, ${lat}, ${lng});
+              way["amenity"="hospital"](around:5000, ${lat}, ${lng});
+              relation["amenity"="hospital"](around:5000, ${lat}, ${lng});
+            );
+            out center;
+        `;
+
+            try {
+                const response = await fetch('https://overpass-api.de/api/interpreter', {
+                    method: 'POST',
+                    body: query
+                });
+                const data = await response.json();
+
+                displayHospitals(data.elements, lat, lng);
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('status-msg').textContent = "Failed to fetch hospitals.";
+            } finally {
+                const btn = document.querySelector('.locate-btn');
+                const btnText = document.querySelector('.btn-text');
+                const spinner = document.querySelector('.loading-spinner');
+
+                btn.disabled = false;
+                btnText.style.display = 'block';
+                spinner.style.display = 'none';
+            }
+        }
+
+        function displayHospitals(elements, userLat, userLng) {
+            const list = document.getElementById('hospital-list');
+            const status = document.getElementById('status-msg');
+
+            // Clear previous
+            list.innerHTML = '';
+            hospitalMarkers.forEach(m => map.removeLayer(m));
+            hospitalMarkers = [];
+
+            if (elements.length === 0) {
+                status.textContent = "No hospitals found within 5km.";
+                return;
+            }
+
+            status.textContent = `Found ${elements.length} hospitals nearby.`;
+
+            elements.forEach(el => {
+                const lat = el.lat || el.center.lat;
+                const lon = el.lon || el.center.lon;
+                const name = el.tags.name || "Unnamed Hospital";
+                const type = el.tags.healthcare || "General Hospital";
+
+                // Add Marker
+                const marker = L.marker([lat, lon], { icon: hospitalIcon })
+                    .addTo(map)
+                    .bindPopup(`<b>${name}</b><br><a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}" target="_blank">Get Directions</a>`);
+
+                hospitalMarkers.push(marker);
+
+                // Add List Item
+                const li = document.createElement('li');
+                li.className = 'hospital-item';
+                li.innerHTML = `
+                <div class="hospital-name">${name}</div>
+                <div class="hospital-type"><i class="fas fa-clinic-medical"></i> ${type}</div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}" target="_blank" class="directions-link">
+                    <i class="fas fa-directions"></i> Get Directions
+                </a>
+            `;
+
+                li.onclick = () => {
+                    map.setView([lat, lon], 16);
+                    marker.openPopup();
+                };
+
+                list.appendChild(li);
+            });
+        }
+    </script>
+
+</body>
+
+</html>

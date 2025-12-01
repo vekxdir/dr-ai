@@ -7,22 +7,9 @@
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/custom.css">
     <style>
-        .curve-bg {
-            position: relative;
-            background: linear-gradient(180deg, #f7f2ff 0%, #ffffff 70%);
-            padding-top: 120px;
-            padding-bottom: 120px;
-            border-radius: 0 0 50% 50% / 0 0 12% 12%;
-        }
-
-        .curve-bg-bottom {
-            position: relative;
-            background: linear-gradient(180deg, #ffffff 0%, #f7f2ff 100%);
-            padding-top: 120px;
-            padding-bottom: 120px;
-            border-radius: 50% 50% 0 0 / 12% 12% 0 0;
-        }
+        /* Removed inline curve-bg styles in favor of custom.css animated background */
     </style>
 
 
@@ -30,31 +17,39 @@
 </head>
 
 <body class="bg-white">
-
-<!-- NAVBAR FRAGMENT -->
-<nav th:fragment="nav" class="relative z-20 bg-white/40 backdrop-blur border-b">
-    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-gradient-to-tr from-purple-500 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">DR</div>
-            <div class="font-semibold text-lg">DR-AI</div>
-        </div>
-        <div class="hidden md:flex gap-6">
-            <a href="#" class="font-medium">Home</a>
-            <a href="/zigzag.html" class="font-medium">Feature</a>
-            <a href="#" class="font-medium">Contact</a>
-        </div>
+    <div class="animated-background">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
     </div>
-</nav>
 
-<!-- CONTENT SLOT -->
-<main th:fragment="content">
-    <!-- index.html content will be inserted here -->
-</main>
-<footer th:fragment="footer" class="mt-12">
-    <div class="max-w-6xl mx-auto text-center py-6 text-sm text-gray-500">
-        © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> DR-AI • Anonymous & temporary files
-    </div>
-</footer>
+    <!-- NAVBAR FRAGMENT -->
+    <nav th:fragment="nav" class="relative z-20 bg-white/40 backdrop-blur border-b">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 bg-gradient-to-tr from-purple-500 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">
+                    DR</div>
+                <div class="font-semibold text-lg">DR-AI</div>
+            </div>
+            <div class="hidden md:flex gap-6">
+                <a href="#" class="font-medium">Home</a>
+                <a href="/zigzag.html" class="font-medium">Feature</a>
+                <a href="#" class="font-medium">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENT SLOT -->
+    <main th:fragment="content">
+        <!-- index.html content will be inserted here -->
+    </main>
+    <footer th:fragment="footer" class="mt-12">
+        <div class="max-w-6xl mx-auto text-center py-6 text-sm text-gray-500">
+            © <span th:text="${#dates.format(#dates.createNow(),'yyyy')}"></span> DR-AI • Anonymous & temporary files
+        </div>
+    </footer>
 
 </body>
+
 </html>

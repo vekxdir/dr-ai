@@ -1,113 +1,421 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="utf-8" />
-    <title>Symptom Checker</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DR-AI | Symptom Checker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/custom.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* small polish */
-        .panel { display: none; }
-        .panel.active { display: block; }
-        .checkbox-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:10px; }
+        :root {
+            --primary: #ff4757;
+            --secondary: #2f3542;
+            --bg: #f1f2f6;
+            --glass: rgba(255, 255, 255, 0.95);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--secondary);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: -webkit-linear-gradient(45deg, #ff4757, #ff6b81);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #747d8c;
+            font-size: 1.1rem;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2f3542;
+        }
+
+        .tags-input-container {
+            border: 2px solid #dfe4ea;
+            border-radius: 16px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .tags-input-container:focus-within {
+            border-color: var(--primary);
+        }
+
+        .tag {
+            background: #ff4757;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .tag i {
+            cursor: pointer;
+            font-style: normal;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            border: none;
+            outline: none;
+            padding: 8px;
+            font-size: 1rem;
+            flex-grow: 1;
+            min-width: 150px;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 71, 87, 0.3);
+        }
+
+        .analyze-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Results Section */
+        #results-area {
+            display: none;
+        }
+
+        .condition-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .condition-card:hover {
+            transform: translateX(5px);
+        }
+
+        .condition-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .condition-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2f3542;
+        }
+
+        .match-score {
+            background: #eccc68;
+            color: #2f3542;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .match-high {
+            background: #2ed573;
+            color: white;
+        }
+
+        .match-med {
+            background: #ffa502;
+            color: white;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #a4b0be;
+            margin: 10px 0 5px 0;
+            font-weight: 700;
+        }
+
+        .text-content {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #57606f;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            color: #747d8c;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 20px;
+                margin: 20px auto;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            /* Assuming .tag-input input refers to the input within the tags container */
+            .tags-input-container input[type="text"] {
+                width: 100%;
+            }
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
-<body class="bg-gradient-to-b from-purple-200 to-purple-50 min-h-screen">
 
-<!-- header -->
-<div class="flex justify-center mt-6">
-    <div class="flex gap-6 text-gray-400 font-semibold text-lg">
-        <span data-step="info" class="step text-purple-600">Info</span>
-        <span data-step="symptoms" class="step">Symptoms</span>
-        <span data-step="conditions" class="step">Conditions</span>
-        <span data-step="details" class="step">Details</span>
-        <span data-step="treatment" class="step">Treatment</span>
+<body>
+    <div class="animated-background">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
     </div>
-</div>
 
-<div class="max-w-3xl mx-auto mt-6 bg-white shadow-xl rounded-2xl p-10">
-
-    <h1 class="text-center text-2xl font-bold text-purple-600 mb-8">Symptom Checker</h1>
-
-    <!-- INFO panel -->
-    <div id="panel-info" class="panel active">
-        <div class="text-center mb-6">
-            <label class="font-semibold">Age</label>
-            <input id="ageInput" type="number" min="1" value="22"
-                   class="border rounded px-3 py-1 w-20 text-center ml-3">
+    <div class="container">
+        <div class="header">
+            <h1>Symptom Checker</h1>
+            <p class="subtitle">Enter your symptoms to get an AI-powered analysis.</p>
         </div>
 
-        <div class="text-center mb-6">
-            <label class="font-semibold">Sex</label>
-            <div class="flex justify-center mt-2 gap-3">
-                <button id="btnMale" class="sex-btn px-6 py-2 rounded-full bg-purple-500 text-white">Male</button>
-                <button id="btnFemale" class="sex-btn px-6 py-2 rounded-full bg-gray-200">Female</button>
+        <div class="card">
+            <div class="input-group">
+                <label>What are your symptoms?</label>
+                <div class="tags-input-container" onclick="document.getElementById('symptom-input').focus()">
+                    <!-- Tags will appear here -->
+                    <input type="text" id="symptom-input" placeholder="Type and press Enter (e.g., fever, cough)">
+                </div>
+                <p style="font-size: 0.85rem; color: #a4b0be; margin-top: 8px;">Press Enter to add a symptom.</p>
+            </div>
+
+            <button class="analyze-btn" onclick="analyze()">Analyze Symptoms</button>
+        </div>
+
+        <div id="results-area">
+            <h2 style="margin-bottom: 20px; color: #2f3542;">Analysis Results</h2>
+            <div id="conditions-list">
+                <!-- Condition Cards -->
             </div>
         </div>
 
-        <div class="flex justify-center mt-8">
-            <button id="toSymptomsBtn" class="px-6 py-2 bg-purple-600 text-white rounded-full shadow">
-                Continue →
-            </button>
-        </div>
+        <a href="/" class="back-link">← Back to Home</a>
     </div>
 
-    <!-- SYMPTOMS panel -->
-    <div id="panel-symptoms" class="panel">
-        <label class="font-semibold mb-3 block">Select your symptoms</label>
+    <script>
+        const symptoms = [];
+        const input = document.getElementById('symptom-input');
+        const container = document.querySelector('.tags-input-container');
 
-        <div id="checkboxList" class="checkbox-grid mb-4"></div>
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && input.value.trim() !== '') {
+                addSymptom(input.value.trim());
+                input.value = '';
+            }
+            if (e.key === 'Backspace' && input.value === '' && symptoms.length > 0) {
+                removeSymptom(symptoms.length - 1);
+            }
+        });
 
-        <div class="flex justify-between mt-8">
-            <button id="backFromSymptoms" class="text-purple-600">← Previous</button>
-            <button id="toConditionsBtn" class="px-6 py-2 bg-purple-600 text-white rounded-full shadow">Continue →</button>
-        </div>
-    </div>
+        function addSymptom(text) {
+            if (symptoms.includes(text)) return;
+            symptoms.push(text);
+            renderTags();
+        }
 
-    <!-- CONDITIONS panel -->
-    <div id="panel-conditions" class="panel">
-        <h2 class="text-2xl font-bold text-purple-600 text-center mb-4">Possible Conditions</h2>
+        function removeSymptom(index) {
+            symptoms.splice(index, 1);
+            renderTags();
+        }
 
-        <p class="text-gray-600 mb-4">Based on your symptoms, these conditions may match:</p>
+        function renderTags() {
+            // Remove existing tags (keep input)
+            const tags = container.querySelectorAll('.tag');
+            tags.forEach(t => t.remove());
 
-        <div id="conditionResults" class="space-y-3"></div>
+            // Add tags before input
+            symptoms.forEach((text, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'tag';
+                tag.innerHTML = `${text} <i onclick="removeSymptom(${index})">×</i>`;
+                container.insertBefore(tag, input);
+            });
+        }
 
-        <div class="flex justify-between mt-8">
-            <button id="backFromConditions" class="text-purple-600">← Previous</button>
-        </div>
-    </div>
+        async function analyze() {
+            if (symptoms.length === 0) {
+                alert('Please add at least one symptom.');
+                return;
+            }
 
-    <!-- DETAILS panel -->
-    <div id="panel-details" class="panel">
-        <h2 class="text-xl font-bold text-purple-600 mb-4">Condition Details</h2>
+            const btn = document.querySelector('.analyze-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Analyzing...';
+            btn.disabled = true;
 
-        <div id="detailsBox" class="text-gray-700 leading-relaxed"></div>
+            try {
+                const response = await fetch('/api/symptoms/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symptoms: symptoms })
+                });
 
-        <div class="flex justify-between mt-8">
-            <button id="backFromDetails" class="text-purple-600">← Previous</button>
-            <button id="toTreatmentBtn" class="px-6 py-2 bg-purple-600 text-white rounded-full">Continue →</button>
-        </div>
-    </div>
+                const data = await response.json();
+                displayResults(data.conditions);
 
-    <!-- TREATMENT panel -->
-    <div id="panel-treatment" class="panel">
-        <h2 class="text-xl font-bold text-purple-600 mb-4">Treatment Options</h2>
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Analysis failed. Please try again.');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
 
-        <div id="treatmentBox" class="text-gray-700 leading-relaxed"></div>
+        function displayResults(conditions) {
+            const list = document.getElementById('conditions-list');
+            const area = document.getElementById('results-area');
+            list.innerHTML = '';
 
-        <div class="flex justify-between mt-8">
-            <button id="backFromTreatment" class="text-purple-600">← Previous</button>
-            <button id="restartBtn" class="px-6 py-2 bg-purple-600 text-white rounded-full">Start Over</button>
-        </div>
-    </div>
+            if (!conditions || conditions.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:#747d8c;">No matching conditions found.</p>';
+            } else {
+                conditions.forEach((cond, index) => {
+                    const scoreClass = cond.matchScore > 0.7 ? 'match-high' : (cond.matchScore > 0.4 ? 'match-med' : '');
+                    const scorePercent = Math.round(cond.matchScore * 100) + '% Match';
 
-</div>
+                    const card = document.createElement('div');
+                    card.className = 'condition-card';
+                    card.style.animation = `fadeInUp 0.5s ease ${index * 0.1}s forwards`;
+                    card.style.opacity = '0'; // Start hidden for animation
 
-<!-- separate JS files -->
-<script src="/js/info.js"></script>
-<script src="/js/symptoms.js"></script>
-<script src="/js/conditions.js"></script>
-<script src="/js/details.js"></script>
-<script src="/js/treatment.js"></script>
+                    card.innerHTML = `
+                    <div class="condition-header">
+                        <span class="condition-name">${cond.name}</span>
+                        <span class="match-score ${scoreClass}">${scorePercent}</span>
+                    </div>
+                    <div class="section-title">Overview</div>
+                    <p class="text-content">${cond.overview}</p>
+                    <div class="section-title" style="margin-top: 15px;">Treatment</div>
+                    <p class="text-content">${cond.treatment}</p>
+                `;
+                    list.appendChild(card);
+                });
+            }
+
+            area.style.display = 'block';
+            area.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
 
 </body>
+
 </html>

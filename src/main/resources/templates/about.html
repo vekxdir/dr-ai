@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DR-AI | About Us</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/custom.css">
+    <style>
+        :root {
+            --primary: #a29bfe;
+            --accent: #fd79a8;
+            --text: #2d3436;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Body background handled in custom.css */
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            padding: 15px 30px;
+            border-radius: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: #6c5ce7;
+            text-decoration: none;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: #636e72;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .back-btn:hover {
+            color: #6c5ce7;
+        }
+
+        /* Hamburger & Mobile Menu */
+        .hamburger {
+            display: none;
+            font-size: 1.5rem;
+            color: #2d3436;
+            cursor: pointer;
+        }
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 80px;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transform: translateY(-150%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 999;
+        }
+
+        .mobile-menu.active {
+            transform: translateY(0);
+        }
+
+        .mobile-menu a {
+            text-decoration: none;
+            color: #2d3436;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* Content */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 150px 20px 80px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #6c5ce7, #fd79a8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .mission-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            padding: 50px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.05);
+            margin-bottom: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .mission-card p {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            color: #636e72;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            animation: fadeInUp 1.2s ease-out;
+        }
+
+        .value-card {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s;
+        }
+
+        .value-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .v-icon {
+            width: 70px;
+            height: 70px;
+            background: #f0f3ff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            color: #6c5ce7;
+            margin: 0 auto 20px;
+        }
+
+        .v-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .v-desc {
+            color: #b2bec3;
+            line-height: 1.6;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                width: 95%;
+                padding: 15px 20px;
+                justify-content: space-between;
+            }
+
+            .nav-links-desktop {
+                display: none;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .mobile-menu {
+                display: flex;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .mission-card {
+                padding: 30px;
+            }
+
+            .mission-card p {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="animated-background">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <nav class="navbar">
+        <a href="/" class="logo">DR-AI</a>
+        <div class="nav-links-desktop">
+            <a href="/" class="back-btn">Back to Home</a>
+        </div>
+        <div class="hamburger">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <a href="/">Home</a>
+        <a href="/zigzag">Features</a>
+        <a href="/about">About</a>
+    </div>
+
+    <div class="container">
+        <h1>Empowering Your<br>Health Journey</h1>
+
+        <div class="mission-card">
+            <p>
+                At <strong>DR-AI</strong>, we believe quality healthcare information should be accessible to everyone,
+                everywhere.
+                Powered by advanced Artificial Intelligence, we bridge the gap between medical complexity and patient
+                understanding.
+                Whether it's decoding a lab report, checking a symptom, or finding emergency care, DR-AI is your trusted
+                24/7 companion.
+            </p>
+        </div>
+
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="v-icon"><i class="fas fa-user-shield"></i></div>
+                <div class="v-title">Privacy First</div>
+                <div class="v-desc">Your health data is sensitive. We prioritize security and anonymity in every
+                    interaction.</div>
+            </div>
+            <div class="value-card">
+                <div class="v-icon"><i class="fas fa-brain"></i></div>
+                <div class="v-title">AI Precision</div>
+                <div class="v-desc">Leveraging Google's Gemini API to provide accurate, context-aware medical insights.
+                </div>
+            </div>
+            <div class="value-card">
+                <div class="v-icon"><i class="fas fa-heartbeat"></i></div>
+                <div class="v-title">Always On</div>
+                <div class="v-desc">Health concerns don't wait for office hours. Neither do we. Support whenever you
+                    need it.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const hamburger = document.querySelector('.hamburger');
+        const mobileMenu = document.querySelector('.mobile-menu');
+
+        hamburger.addEventListener('click', () => {
+            mobileMenu.classList.toggle('active');
+            const icon = hamburger.querySelector('i');
+            if (mobileMenu.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+    </script>
+
+</body>
+
+</html>
