@@ -1,0 +1,10 @@
+/* small fixes for glassmorphism and responsive hero */
+body { -webkit-font-smoothing: antialiased; }
+
+
+/* override Tailwind defaults if needed */
+.hero-bg-dot { background-image: radial-gradient(rgba(124,58,237,0.06) 1px, transparent 1px); background-size: 14px 14px; }
+
+
+/* floating card shadow */
+.card-float { box-shadow: 0 10px 30px rgba(16,24,40,0.08); }

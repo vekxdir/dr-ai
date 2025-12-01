@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>DR-AI — Feature Journey </title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                primary: "#7C3AED",
+                line: "#C084FC",
+              }
+            }
+          }
+        };
+    </script>
+
+    <style>
+        body { background: #faf5ff; }
+
+        .timeline-wrap { max-width: 1150px; margin: auto; position: relative; }
+
+        /* Line animate */
+        .zigpath {
+          stroke-dasharray: 10000;
+          stroke-dashoffset: 10000;
+          transition: stroke-dashoffset 2s ease-out;
+        }
+        .zigpath.drawn { stroke-dashoffset: 0; }
+
+        /* Reveal anim */
+        .node, .card {
+          opacity: 0;
+          transform: translateY(14px) scale(.97);
+          transition: all .55s cubic-bezier(.2,.9,.2,1);
+        }
+        .in-view {
+          opacity: 1 !important;
+          transform: translateY(0px) scale(1) !important;
+        }
+
+        /* Node */
+        .node {
+          width: 60px; height: 60px; border-radius: 9999px;
+          background: white;
+          border: 6px solid rgba(192,132,252,0.75);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 20px; font-weight: 700; color: #7C3AED;
+          position: absolute; z-index: 50;
+          box-shadow: 0 15px 28px rgba(0,0,0,0.08);
+        }
+
+        /* Card */
+        .card {
+          width: 430px;
+          background: white;
+          border-radius: 16px;
+          padding: 22px;
+          border: 1px solid rgba(124,58,237,0.1);
+          box-shadow: 0 20px 40px rgba(0,0,0,0.07);
+          position: absolute; z-index: 30;
+        }
+
+        .card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 26px 45px rgba(0,0,0,0.12);
+        }
+
+        .card a { text-decoration: none; color: inherit; display: block; }
+
+        /* Mobile */
+        @media (max-width: 900px) {
+          .svg-layer { display: none; }
+          .node, .card { position: static !important; margin: 25px auto; }
+          .card { width: 90% !important; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<nav class="fixed top-0 left-0 w-full bg-white/70 backdrop-blur z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="text-2xl font-bold text-primary">DR-AI</div>
+        <div class="hidden md:flex gap-6 font-medium">
+            <a href="/" class="hover:text-primary">Home</a>
+            <a href="/zigzag" class="text-primary font-semibold">Features</a>
+            <a href="/contact" class="hover:text-primary">Contact</a>
+        </div>
+    </div>
+</nav>
+
+<div class="h-20"></div>
+
+<main class="timeline-wrap px-6">
+
+    <header class="text-center mb-14">
+        <h1 class="text-5xl font-extrabold text-primary">DR-AI Feature Journey</h1>
+        <p class="mt-2 text-gray-600 text-lg">
+            A smooth, clean zig-zag roadmap
+        </p>
+    </header>
+
+    <!-- SVG CONTAINER -->
+    <div id="svgContainer" class="svg-layer relative w-full flex justify-center pointer-events-none"></div>
+
+    <!-- ITEMS -->
+    <div id="itemsContainer" class="relative w-full"></div>
+
+</main>
+
+<script>
+    (function () {
+
+      /* ===== Features Array ===== */
+      const features = [
+        { key: 'DR-AI', title: 'Overview & Home', subtitle: 'Your AI medical assistant hub.', href: '/' },
+        { key: 'Nearby Hospitals', title: 'Hospital Map', subtitle: 'Find any hospital instantly.', href: '/hospital-map' },
+        { key: 'First Aid', title: 'First Aid Guide', subtitle: 'Lifesaving quick steps.', href: '/first-aid' },
+        { key: 'Blood Group', title: 'Blood Group Matcher', subtitle: 'Find compatible matches.', href: '/blood-matcher' },
+        { key: 'Compare', title: 'Illness Comparison', subtitle: 'Disease side-by-side.', href: '/illness-compare' },
+        { key: 'Symptoms', title: 'AI Triage', subtitle: 'Smart symptom scan.', href: '/symptom-checker' },
+        { key: 'Reports', title: 'AI Report Scan', subtitle: 'Analyze medical reports.', href: '/report-analyzer' },
+        { key: 'Medicine', title: 'Drug Interactions', subtitle: 'Check safety instantly.', href: '/medicine-checker' },
+        { key: 'Diet', title: 'Diet Recommendation', subtitle: 'AI diet planning.', href: '/diet' },
+        { key: 'Triage', title: 'Emergency AI', subtitle: 'Critical triage scan.', href: '/triage' },
+        { key: 'PDF', title: 'PDF Summary', subtitle: 'Doctor-friendly PDFs.', href: '/pdf-summary' },
+      ];
+
+      /* ===== Layout Config ===== */
+      const leftX = 60;
+      const rightX = 340;
+      const centerX = 200;
+
+      const stepY = 220;      // MORE spacing
+      const marginTop = 100;  // cleaner top spacing
+      const gapX = 100;       // push cards OUTWARD
+
+      const nodeOffset = -32;
+      const cardOffsetY = -40;
+
+      const bends = features.length;
+      const svgHeight = marginTop + bends * stepY + 300;
+
+      /* ===== Build Zig-Zag SVG ===== */
+      const svgContainer = document.getElementById("svgContainer");
+      const svgNS = "http://www.w3.org/2000/svg";
+
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("width", 400);
+      svg.setAttribute("height", svgHeight);
+      svg.setAttribute("viewBox", `0 0 400 ${svgHeight}`);
+      svg.style.position = "absolute";
+      svg.style.left = "50%";
+      svg.style.transform = "translateX(-50%)";
+
+      const points = [];
+      points.push(`200,0`);
+
+      for (let i = 0; i < bends; i++) {
+        const y = marginTop + i * stepY;
+        const bendX = i % 2 === 0 ? rightX : leftX;
+        points.push(`${bendX},${y}`);
+        points.push(`${centerX},${y + stepY / 2}`);
+      }
+
+      points.push(`${centerX},${svgHeight - 50}`);
+
+      const bg = document.createElementNS(svgNS, "polyline");
+      bg.setAttribute("points", points.join(" "));
+      bg.setAttribute("stroke", "rgba(192,132,252,0.15)");
+      bg.setAttribute("stroke-width", "32");
+      bg.setAttribute("fill", "none");
+      svg.appendChild(bg);
+
+      const path = document.createElementNS(svgNS, "polyline");
+      path.setAttribute("points", points.join(" "));
+      path.setAttribute("stroke", "#C084FC");
+      path.setAttribute("stroke-width", "12");
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke-linejoin", "round");
+      path.setAttribute("class", "zigpath");
+      svg.appendChild(path);
+
+      svgContainer.appendChild(svg);
+
+      /* ===== Nodes + Cards ===== */
+      const container = document.getElementById("itemsContainer");
+      container.style.minHeight = svgHeight + "px";
+
+      for (let i = 0; i < features.length; i++) {
+
+        const bendX = i % 2 === 0 ? rightX : leftX;
+        const y = marginTop + i * stepY;
+
+        /* Node */
+        const node = document.createElement("div");
+        node.className = "node";
+        node.textContent = i + 1;
+        node.style.left = `calc(50% - 200px + ${bendX}px)`;
+        node.style.top = `${y + nodeOffset}px`;
+        container.appendChild(node);
+
+        /* Card */
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+          <a href="${features[i].href}" target="_blank">
+            <div class="text-sm text-primary font-semibold">${features[i].key}</div>
+            <div class="text-2xl font-bold mt-1">${features[i].title}</div>
+            <div class="text-gray-600 mt-2">${features[i].subtitle}</div>
+          </a>
+        `;
+
+        let cardLeft;
+        if (i % 2 === 0) {
+          cardLeft = `calc(50% - 200px + ${bendX}px - ${430 + gapX}px)`;
+        } else {
+          cardLeft = `calc(50% - 200px + ${bendX}px + ${gapX}px)`;
+        }
+
+        card.style.left = cardLeft;
+        card.style.top = `${y + cardOffsetY}px`;
+
+        container.appendChild(card);
+      }
+
+      /* ===== Reveal Animations ===== */
+      const revealObs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) e.target.classList.add("in-view");
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.node, .card').forEach(el => revealObs.observe(el));
+
+      /* Draw line */
+      const pathObs = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          path.classList.add("drawn");
+          pathObs.disconnect();
+        }
+      }, { threshold: 0.05 });
+
+      pathObs.observe(path);
+
+    })();
+</script>
+
+</body>
+</html>

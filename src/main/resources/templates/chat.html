@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DR-AI Chatbot</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* Typing dots animation */
+        .dot {
+            animation: blink 1.4s infinite both;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes blink {
+            0% { opacity: .2; }
+            20% { opacity: 1; }
+            100% { opacity: .2; }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen bg-gradient-to-b from-purple-100 via-purple-50 to-white">
+
+
+
+<div class="w-full max-w-2xl bg-white shadow-xl rounded-xl p-4 flex flex-col h-[80vh]">
+
+    <!-- Header -->
+    <div class="text-center py-3 border-b font-bold text-2xl text-blue-600">
+        DR-AI Assistant
+    </div>
+
+    <!-- CHAT AREA -->
+    <div id="chatBox"
+         class="flex-1 overflow-y-auto px-3 py-2 space-y-4">
+    </div>
+
+    <!-- INPUT AREA -->
+    <div class="flex gap-2 mt-3 border-t pt-3">
+        <input id="userInput"
+               class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-400"
+               placeholder="Type your question..." />
+
+        <button onclick="sendMessage()"
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            Send
+        </button>
+    </div>
+
+</div>
+
+<!-- Chat Script -->
+<script>
+
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+
+    function scrollDown() {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function addMessage(text, type) {
+        const bubble = document.createElement("div");
+
+        if (type === "user") {
+            bubble.className = "text-right";
+            bubble.innerHTML = `
+                <div class="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg max-w-[80%]">
+                    ${text}
+                </div>`;
+        } else {
+            bubble.className = "text-left";
+            bubble.innerHTML = `
+                <div class="inline-block bg-gray-200 text-black px-4 py-2 rounded-lg max-w-[80%]">
+                    ${text}
+                </div>`;
+        }
+
+        chatBox.appendChild(bubble);
+        scrollDown();
+    }
+
+    function addTyping() {
+        const typingBubble = document.createElement("div");
+        typingBubble.id = "typing";
+        typingBubble.className = "text-left";
+        typingBubble.innerHTML = `
+            <div class="inline-block bg-gray-200 text-black px-4 py-2 rounded-lg max-w-[80%]">
+                <span class="dot">•</span><span class="dot">•</span><span class="dot">•</span>
+            </div>`;
+        chatBox.appendChild(typingBubble);
+        scrollDown();
+    }
+
+    function removeTyping() {
+        const typing = document.getElementById("typing");
+        if (typing) typing.remove();
+    }
+
+    async function sendMessage() {
+
+        const text = userInput.value.trim();
+        if (!text) return;
+
+        addMessage(text, "user");
+        userInput.value = "";
+        addTyping();
+
+        try {
+            const response = await fetch("/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    message: text,
+                    userId: "anonymous"
+                })
+            });
+
+            const result = await response.json();
+            removeTyping();
+            addMessage(result.answer, "ai");
+
+        } catch (err) {
+            removeTyping();
+            addMessage("⚠️ Error connecting to server.", "ai");
+        }
+    }
+
+    userInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") sendMessage();
+    });
+
+</script>
+
+
+</body>
+</html>

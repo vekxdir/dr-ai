@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DR-AI — Personal Medical Assistant</title>
+
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+
+    <!-- optional: configure Tailwind (colors, fonts) -->
+    <script>
+        tailwind.config = {
+        theme: {
+        extend: {
+        colors: {
+        primary: '#7C3AED',
+        accent: '#6EE7B7'
+        }
+        }
+        }
+        }
+    </script>
+
+
+    <!-- small custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/custom.css}" />
+</head>
+</html>

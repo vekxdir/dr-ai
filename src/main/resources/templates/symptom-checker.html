@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Symptom Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* small polish */
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .checkbox-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:10px; }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-purple-200 to-purple-50 min-h-screen">
+
+<!-- header -->
+<div class="flex justify-center mt-6">
+    <div class="flex gap-6 text-gray-400 font-semibold text-lg">
+        <span data-step="info" class="step text-purple-600">Info</span>
+        <span data-step="symptoms" class="step">Symptoms</span>
+        <span data-step="conditions" class="step">Conditions</span>
+        <span data-step="details" class="step">Details</span>
+        <span data-step="treatment" class="step">Treatment</span>
+    </div>
+</div>
+
+<div class="max-w-3xl mx-auto mt-6 bg-white shadow-xl rounded-2xl p-10">
+
+    <h1 class="text-center text-2xl font-bold text-purple-600 mb-8">Symptom Checker</h1>
+
+    <!-- INFO panel -->
+    <div id="panel-info" class="panel active">
+        <div class="text-center mb-6">
+            <label class="font-semibold">Age</label>
+            <input id="ageInput" type="number" min="1" value="22"
+                   class="border rounded px-3 py-1 w-20 text-center ml-3">
+        </div>
+
+        <div class="text-center mb-6">
+            <label class="font-semibold">Sex</label>
+            <div class="flex justify-center mt-2 gap-3">
+                <button id="btnMale" class="sex-btn px-6 py-2 rounded-full bg-purple-500 text-white">Male</button>
+                <button id="btnFemale" class="sex-btn px-6 py-2 rounded-full bg-gray-200">Female</button>
+            </div>
+        </div>
+
+        <div class="flex justify-center mt-8">
+            <button id="toSymptomsBtn" class="px-6 py-2 bg-purple-600 text-white rounded-full shadow">
+                Continue →
+            </button>
+        </div>
+    </div>
+
+    <!-- SYMPTOMS panel -->
+    <div id="panel-symptoms" class="panel">
+        <label class="font-semibold mb-3 block">Select your symptoms</label>
+
+        <div id="checkboxList" class="checkbox-grid mb-4"></div>
+
+        <div class="flex justify-between mt-8">
+            <button id="backFromSymptoms" class="text-purple-600">← Previous</button>
+            <button id="toConditionsBtn" class="px-6 py-2 bg-purple-600 text-white rounded-full shadow">Continue →</button>
+        </div>
+    </div>
+
+    <!-- CONDITIONS panel -->
+    <div id="panel-conditions" class="panel">
+        <h2 class="text-2xl font-bold text-purple-600 text-center mb-4">Possible Conditions</h2>
+
+        <p class="text-gray-600 mb-4">Based on your symptoms, these conditions may match:</p>
+
+        <div id="conditionResults" class="space-y-3"></div>
+
+        <div class="flex justify-between mt-8">
+            <button id="backFromConditions" class="text-purple-600">← Previous</button>
+        </div>
+    </div>
+
+    <!-- DETAILS panel -->
+    <div id="panel-details" class="panel">
+        <h2 class="text-xl font-bold text-purple-600 mb-4">Condition Details</h2>
+
+        <div id="detailsBox" class="text-gray-700 leading-relaxed"></div>
+
+        <div class="flex justify-between mt-8">
+            <button id="backFromDetails" class="text-purple-600">← Previous</button>
+            <button id="toTreatmentBtn" class="px-6 py-2 bg-purple-600 text-white rounded-full">Continue →</button>
+        </div>
+    </div>
+
+    <!-- TREATMENT panel -->
+    <div id="panel-treatment" class="panel">
+        <h2 class="text-xl font-bold text-purple-600 mb-4">Treatment Options</h2>
+
+        <div id="treatmentBox" class="text-gray-700 leading-relaxed"></div>
+
+        <div class="flex justify-between mt-8">
+            <button id="backFromTreatment" class="text-purple-600">← Previous</button>
+            <button id="restartBtn" class="px-6 py-2 bg-purple-600 text-white rounded-full">Start Over</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- separate JS files -->
+<script src="/js/info.js"></script>
+<script src="/js/symptoms.js"></script>
+<script src="/js/conditions.js"></script>
+<script src="/js/details.js"></script>
+<script src="/js/treatment.js"></script>
+
+</body>
+</html>
