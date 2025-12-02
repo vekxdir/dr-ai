@@ -1,6 +1,6 @@
 app:
   gemini:
-    api-key: ${GEMINI_API_KEY:AIzaSyD7RoiGjxK2RWJ8YiUvx9IzXjfbpo4DNyw}
+    api-key: ${GEMINI_API_KEY:AIzaSyB9moxQAxNols718lFdqYSR52rda8cQGKI}
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
     model: gemini-2.5-flash
 
